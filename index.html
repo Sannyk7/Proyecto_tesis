@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cumulative UV Exposure Score Calculator</title>
+  <script src="js/jquery-1.11.3.min.js"></script>
+  <script src="js/underscore-min.js"></script>
+  <script src="js/backbone-min.js"></script>
+  <script src="js/typeahead.jquery.js"></script>
+  <script src="js/cities.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCdXoGfrzGof9p-6jl5sBuzhdoUDvr__HQ"></script>
+  <script src="js/svg.min.js"></script>
+  <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+  body {
+    padding-top: 50px;
+  }
+
+  .etable {
+    border-top: 1px solid #ddd;
+  }
+
+  .etable th {
+    border-bottom: 1px solid #ddd;
+  }
+
+  .etable td, .etable th {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .question {
+    font-weight: bold;
+  }
+
+  .qtable {
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .qtable th {
+    text-align: center;
+  }
+
+  .qtable td {
+    border-top: 1px solid #ddd;
+    padding: 3px;
+  }
+
+  .qtable tr td {
+    text-align: center;
+  }
+
+  .qtable tr td:first-child {
+    text-align: left;
+  }
+
+  .specific-disabled {
+    color: #bbbbbb;
+  }
+
+  .specific-hidden {
+    display: none;
+  }
+  
+  .typeahead,
+  .tt-query,
+  .tt-hint {
+  }
+
+  .typeahead {
+    background-color: #fff;
+  }
+
+  .tt-dropdown-menu {
+    width: 190px;
+    margin-top: 0px;
+    padding: 0 0;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    -webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+       -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+            box-shadow: 0 5px 10px rgba(0,0,0,.2);
+  }
+
+  .tt-suggestion {
+    padding: 3px 4px;
+    line-height: 24px;
+  }
+
+  .tt-suggestion.tt-cursor {
+    color: #fff;
+    background-color: #0097cf;
+  }
+
+  .tt-suggestion p {
+    margin: 0;
+  }
+  </style>
+</head>
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <!--<a class="navbar-brand" href="#">Lifetime UV Exposure</a>-->
+    </div>
+    <div class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="/">Home</a></li>
+        <!--<li><a href="#about">About</a></li>-->
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+
+<h1>Cumulative UV Exposure Score Calculator</h1>
+
+  <br>
+  <div class="panel panel-success">
+    <div class="panel-heading">
+      <h3 class="panel-title">Instructions</h3>
+    </div>
+    <div class="panel-body">
+
+      This is a live demonstration of the questionnaire instrument and cumulative ultraviolet exposure score (CUES) calculation methodology for <i>Zhu et al.</i> <b>2015</b>. This demonstration version of the questionnaire was modified so that no data is collected or stored, but is otherwise a exact reproduction. A CUES will be calculated from the entered data once the user hits "Submit." <br><br>
+      Please visit our up-to-date GitHub repository at <a href = http://www.github.com/gefeizhu/cues-study>http://www.github.com/gefeizhu/cues-study</a>.
+    </div>
+  </div>
+
+
+
+  <h3>Questions</h3>
+
+  <p class="question">1. What is your age?</p>
+
+  <div>
+    <input type="text" name="age" id="age" style="width: 40px;" autocomplete="off" onkeypress="return isNumber(event)" /> years old.
+  </div>
+
+
+  <div style="height: 6px;"></div>
+  <p class="question">2. How would you rate your skin type - do you burn or tan in the sun?</p>
+
+  <div class="radio">
+    <label><input type="radio" name="skin_type" value="1" onclick="initializeTable()" />Type I - Always burns, never tans (pale white skin)</label><br>
+    <label><input type="radio" name="skin_type" value="2" onclick="initializeTable()" />Type II - Burns easily, tans minimally (white skin)</label><br>
+    <label><input type="radio" name="skin_type" value="3" onclick="initializeTable()" />Type III - Burns moderately, tans uniformly (light brown skin)</label><br>
+    <label><input type="radio" name="skin_type" value="4" onclick="initializeTable()" />Type IV - Burns minimally, tans well (moderate brown skin)</label><br>
+    <label><input type="radio" name="skin_type" value="5" onclick="initializeTable()" />Type V - Rarely burns, tans profusely (dark brown skin)</label><br>
+    <label><input type="radio" name="skin_type" value="6" onclick="initializeTable()" />Type VI - Never burns (deeply pigmented dark brown to black skin)</label>
+  </div>
+
+
+  <div style="height: 6px;"></div>
+  <p class="question">3. Has one or more of your parents, siblings, or children ever been diagnosed with skin cancer?
+  <span style="font-weight: normal;">(Skip to question #5 if the answer is 'No'.)</span></p>
+
+  <div class="radio">
+    <label><input type="radio" name="family_skin_cancer" value="yes" />Yes</label><br>
+    <label><input type="radio" name="family_skin_cancer" value="no" />No</label>
+  </div>
+
+
+  <span id="family_skin_cancer_specific" class="specific-disabled">
+
+    <div style="height: 6px;"></div>
+    <p class="question">4. What type of skin cancer was he/she diagnosed with? You may select more than one.</p>
+
+    <div class="checkbox">
+      <label><input type="checkbox" name="family_skin_cancer_type" value="bcc" disabled="disabled" />Basal cell carcinoma (BCC)</label><br>
+      <label><input type="checkbox" name="family_skin_cancer_type" value="scc" disabled="disabled" />Squamous cell carcinoma (SCC)</label><br>
+      <label><input type="checkbox" name="family_skin_cancer_type" value="melanoma" disabled="disabled" />Melanoma</label><br>
+      <label><input type="checkbox" name="family_skin_cancer_type" value="other" disabled="disabled" />Other</label><br>
+      <label><input type="checkbox" name="family_skin_cancer_type" value="dontknow" disabled="disabled" />Don't know</label>
+    </div>
+
+  </span>
+
+
+  <div style="height: 6px;"></div>
+  <p class="question">5. Have you ever been diagnosed with a skin cancer?
+  <span style="font-weight: normal;">(Skip to question #8 if the answer is 'No'.)</span></p>
+
+  <div class="radio">
+    <label><input type="radio" name="skin_cancer" value="yes" />Yes</label><br>
+    <label><input type="radio" name="skin_cancer" value="no" />No</label>
+  </div>
+
+
+  <span id="skin_cancer_specific" class="specific-disabled">
+
+    <div style="height: 6px;"></div>
+    <p class="question">6. How old were you when you had your first skin cancer?</p>
+
+    <div>
+      <input type="text" name="skin_cancer_age" id="skin_cancer_age" style="width: 40px;" autocomplete="off" disabled="disabled" onkeypress="return isNumber(event)" /> years old.
+      <br>
+      <span style="color: red;" id="skin_cancer_age_error"></span>
+    </div>
+
+    <div style="height: 6px;"></div>
+    <p class="question">7. When you had your first skin cancer, what type was it?</p>
+
+    <div class="radio">
+      <label><input type="radio" name="skin_cancer_type" value="bcc" disabled="disabled" />Basal cell carcinoma (BCC)</label><br>
+      <label><input type="radio" name="skin_cancer_type" value="scc" disabled="disabled" />Squamous cell carcinoma (SCC)</label><br>
+      <label><input type="radio" name="skin_cancer_type" value="melanoma" disabled="disabled" />Melanoma</label><br>
+      <label><input type="radio" name="skin_cancer_type" value="other" disabled="disabled" />Other</label><br>
+      <label><input type="radio" name="skin_cancer_type" value="dontknow" disabled="disabled" />Don't know</label>
+    </div>
+
+  </span>
+
+
+  <div style="height: 6px;"></div>
+  <p class="question" id="question_tanning_bed">8. How many times have you used a tanning bed in your life?</p>
+
+  <div class="radio">
+    <label><input type="radio" name="tanning_bed" value="0" />0</label><br>
+    <label><input type="radio" name="tanning_bed" value="1 - 5" />1 - 5</label><br>
+    <label><input type="radio" name="tanning_bed" value="6 - 10" />6 - 10</label><br>
+    <label><input type="radio" name="tanning_bed" value="11 - 100" />11 - 100</label><br>
+    <label><input type="radio" name="tanning_bed" value="&gt; 100" />greater than 100</label>
+  </div>
+
+
+  <div style="height: 6px;"></div>
+  <p class="question" id="question_sunburn">9. How many blistering sunburns have you had in your lifetime?</p>
+
+  <div class="radio">
+    <label><input type="radio" name="sunburn" value="0" />0</label><br>
+    <label><input type="radio" name="sunburn" value="1 - 5" />1 - 5</label><br>
+    <label><input type="radio" name="sunburn" value="6 - 10" />6 - 10</label><br>
+    <label><input type="radio" name="sunburn" value="&gt; 10" />greater than 10</label>
+  </div>
+
+
+  <div style="height: 6px;"></div>
+  <p class="question" id="question_sunscreen">10. When you are outdoors in the sun, how often do you use sunscreen?</p>
+
+  <div class="radio">
+    <label><input type="radio" name="sunscreen" value="0" />Never</label><br>
+    <label><input type="radio" name="sunscreen" value="1" />Rarely</label><br>
+    <label><input type="radio" name="sunscreen" value="2" />Sometimes</label><br>
+    <label><input type="radio" name="sunscreen" value="3" />Often</label><br>
+    <label><input type="radio" name="sunscreen" value="4" />Always</label>
+  </div>
+
+
+  <div style="height: 6px;"></div>
+  <p class="question" id="question9">11. For the following questions, think about what you do when you are outside during the summer on a warm sunny day.</p>
+
+  <table width="700px" class="qtable">
+    <tr>
+      <th></td>
+      <th width="12%">Never</td>
+      <th width="12%">Rarely</td>
+      <th width="12%">Sometimes</td>
+      <th width="12%">Often</td>
+      <th width="12%">Always</td>
+    </tr>
+    <tr>
+      <td>How often <span class="v_do">do</span> you wear a shirt with sleeves that <span class="v_cover">cover</span> your shoulders?</td>
+      <td><input type="radio" name="q_shirt" value="0" /></td>
+      <td><input type="radio" name="q_shirt" value="1" /></td>
+      <td><input type="radio" name="q_shirt" value="2" /></td>
+      <td><input type="radio" name="q_shirt" value="3" /></td>
+      <td><input type="radio" name="q_shirt" value="4" /></td>
+    </tr>
+    <tr>
+      <td>How often <span class="v_do">do</span> you wear a hat?</td>
+      <td><input type="radio" name="q_hat" value="0" /></td>
+      <td><input type="radio" name="q_hat" value="1" /></td>
+      <td><input type="radio" name="q_hat" value="2" /></td>
+      <td><input type="radio" name="q_hat" value="3" /></td>
+      <td><input type="radio" name="q_hat" value="4" /></td>
+    </tr>
+    <tr>
+      <td>How often <span class="v_do">do</span> you stay in the shade or under an umbrella?</td>
+      <td><input type="radio" name="q_shade" value="0" /></td>
+      <td><input type="radio" name="q_shade" value="1" /></td>
+      <td><input type="radio" name="q_shade" value="2" /></td>
+      <td><input type="radio" name="q_shade" value="3" /></td>
+      <td><input type="radio" name="q_shade" value="4" /></td>
+    </tr>
+  </table>
+
+
+
+
+
+  <div id="skin_cancer_specific2" class="specific-hidden">
+
+  <div style="height: 20px;"></div>
+  <p class="question">12. <u>After</u> you were diagnosed with skin cancer, how many times did you use a tanning bed?</p>
+
+  <div class="radio">
+    <label><input type="radio" name="af_tanning_bed" value="0" />0</label><br>
+    <label><input type="radio" name="af_tanning_bed" value="1 - 5" />1 - 5</label><br>
+    <label><input type="radio" name="af_tanning_bed" value="6 - 10" />6 - 10</label><br>
+    <label><input type="radio" name="af_tanning_bed" value="11 - 100" />11 - 100</label><br>
+    <label><input type="radio" name="af_tanning_bed" value="&gt; 100" />greater than 100</label>
+  </div>
+
+
+  <div style="height: 6px;"></div>
+  <p class="question">13. <u>After</u> you were diagnosed with skin cancer, how many blistering sunburns did you have?</p>
+
+  <div class="radio">
+    <label><input type="radio" name="af_sunburn" value="0" />0</label><br>
+    <label><input type="radio" name="af_sunburn" value="1 - 5" />1 - 5</label><br>
+    <label><input type="radio" name="af_sunburn" value="6 - 10" />6 - 10</label><br>
+    <label><input type="radio" name="af_sunburn" value="&gt; 10" />greater than 10</label>
+  </div>
+
+  <div style="height: 6px;"></div>
+  <p class="question">14. <u>After</u> you were diagnosed with skin cancer, how often did you use sunscreen when you were outside?</p>
+
+  <div class="radio">
+    <label><input type="radio" name="af_sunscreen" value="0" />Never</label><br>
+    <label><input type="radio" name="af_sunscreen" value="1" />Rarely</label><br>
+    <label><input type="radio" name="af_sunscreen" value="2" />Sometimes</label><br>
+    <label><input type="radio" name="af_sunscreen" value="3" />Often</label><br>
+    <label><input type="radio" name="af_sunscreen" value="4" />Always</label>
+  </div>
+
+  <div style="height: 6px;"></div>
+  <p class="question">15. <u>After</u> you were diagnosed with skin cancer, how often do you do the following when you are outside during the summer on a warm sunny day?</p>
+
+  <table width="700px" class="qtable">
+    <tr>
+      <th></td>
+      <th width="12%">Never</td>
+      <th width="12%">Rarely</td>
+      <th width="12%">Sometimes</td>
+      <th width="12%">Often</td>
+      <th width="12%">Always</td>
+    </tr>
+    <tr>
+      <td>How often do you wear a shirt with sleeves that cover your shoulders?</td>
+      <td><input type="radio" name="af_q_shirt" value="0" /></td>
+      <td><input type="radio" name="af_q_shirt" value="1" /></td>
+      <td><input type="radio" name="af_q_shirt" value="2" /></td>
+      <td><input type="radio" name="af_q_shirt" value="3" /></td>
+      <td><input type="radio" name="af_q_shirt" value="4" /></td>
+    </tr>
+    <tr>
+      <td>How often do you wear a hat?</td>
+      <td><input type="radio" name="af_q_hat" value="0" /></td>
+      <td><input type="radio" name="af_q_hat" value="1" /></td>
+      <td><input type="radio" name="af_q_hat" value="2" /></td>
+      <td><input type="radio" name="af_q_hat" value="3" /></td>
+      <td><input type="radio" name="af_q_hat" value="4" /></td>
+    </tr>
+    <tr>
+      <td>How often do you stay in the shade or under an umbrella?</td>
+      <td><input type="radio" name="af_q_shade" value="0" /></td>
+      <td><input type="radio" name="af_q_shade" value="1" /></td>
+      <td><input type="radio" name="af_q_shade" value="2" /></td>
+      <td><input type="radio" name="af_q_shade" value="3" /></td>
+      <td><input type="radio" name="af_q_shade" value="4" /></td>
+    </tr>
+  </table>
+
+  </div>
+
+  <br>
+
+   <h3>Estimated Outdoor Exposure Time</h3>
+
+  <p>Please fill in the hours you spent outdoors between 10 AM and 4 PM per day. As you fill in the hours of exposure, a blue shading effect will be applied to the timeline below to the corresponding epoch. Fill in this section completely before moving on to the next section, <b>as you will not be able to change your responses once you start entering your locations of residence in the next section.</b></p>
+
+  <div class="panel panel-success" style="display: inline-block;">
+    <div class="panel-body">
+      <svg id="timeline" height="50" width="550"></svg>
+    </div>
+  </div>
+
+  <div id="timeapp">
+    <table id="time-list" class="etable">
+      <tr>
+        <th style="width: 160px;">Location</th>
+        <th style="width: 100px;">Age Range</th>
+        <th style="width: 190px;">Weekdays (Hrs/Day)</th>
+        <th style="width: 190px;">Weekends (Hrs/Day)</th>
+      </tr>
+    </table>
+  </div>
+
+  <br>
+
+  <h3>Exposure Location Data</h3>
+
+  <p>
+    Fill in the places you have primarily lived in and what age you lived there.
+    More spaces will appear as you enter the first three lines. 
+    Your location responses will automatically appear next to the corresponding age ranges in the above table for your convenience.
+  </p>
+
+  <div id="locationapp">
+    <table id="location-list" class="etable">
+      <tr>
+        <th style="width: 190px;">Location</th>
+        <th style="width: 190px;">Starting Age</th>
+        <th style="width: 190px;">Ending Age</th>
+      </tr>
+    </table>
+  </div>
+
+  <br>
+
+ 
+
+  <h3>Feedback</h3>
+
+  <p>Do you have any feedback about the survey?</p>
+  <textarea id="feedback" rows="4" style="width: 400px;""></textarea>
+
+
+
+  <br><br>
+  <a href="javascript:calculateCLUE()" class="btn btn-primary btn-lg" role="button" id="calculate">Submit</a>
+
+
+  <div class="modal" id="errorModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title" id="errorModalLabel">Couldn't submit the survey</h4>
+        </div>
+        <div class="modal-body" id="errorModalBody">
+          ...
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <br>
+
+  <p class="page-header"></p>
+  References
+  <ul>
+    <li>Glanz K, Mccarty F, Nehl EJ, et al. Validity of self-reported sunscreen use by parents, children, and lifeguards. Am J Prev Med. 2009;36(1):63-9.</li>
+    <li>Glanz K, Yaroch AL, Dancel M, et al. Measures of sun exposure and sun protection practices for behavioral and epidemiologic research. Arch Dermatol. 2008;144(2):217-22.</li>
+  </ol>
+
+  <br><br>
+
+
+
+  <script type="text/template" id="location-template">
+    <td valign="top">
+      <input type="text" class="location typeahead" value="<%- location %>" placeholder="City, State" />
+      <span class="glyphicon glyphicon-ok ok" style="visibility: hidden; color: green;"></span>
+      <span style="color: red;" class="location_error"></span>
+    </td>
+    <td valign="top">
+      <input type="text" class="start_age" value="<%- start_age %>" onkeypress="return isNumber(event)" <%= (order == 0) ? 'readonly' : '' %> />
+      <span style="color: red;" class="start_age_error"></span>
+    </td>
+    <td valign="top">
+      <input type="text" class="end_age" value="<%- end_age %>" onkeypress="return isNumber(event)" />
+      <span style="color: red;" class="end_age_error"></span>
+    </td>
+  </script>
+
+  <script type="text/template" id="time-template">
+    <% var style = showsSeparator ? 'style="border-top: 1px #dfdfdf solid;"' : '' %>
+    <td valign="top" <%= style %>><%= location %></td>
+    <td valign="top" <%= style %>><%= start_age + ((end_age >= 1000) ? '+' : (' - ' + end_age)) %></td>
+    <td valign="top" <%= style %>>
+      <input type="text" class="d_work" value="<%- d_work %>" onkeypress="return isNumber(event)" disabled />
+      <span style="color: red;" class="d_work_error"></span>
+    </td>
+    <td valign="top" <%= style %>>
+      <input type="text" class="e_work" value="<%- e_work %>" onkeypress="return isNumber(event)" disabled />
+      <span style="color: red;" class="e_work_error"></span>
+    </td>
+  </script>
+
+
+  <script type="text/template" id="location-detail-template">
+    <tr>
+      <td><a href="http://maps.google.com/?q=<%- coordinates %>" target="_blank"><%- location %></a></td>
+      <td><%- uvi %></td>
+      <td><%- start_age %></td>
+      <td><%- end_age %></td>
+      <td><%= c %></td>
+      <td><%= nc %></td>
+    </tr>
+  </script>
+
+  <script type="text/template" id="time-detail-template">
+    <tr>
+      <td><%= start_age + ((end_age >= 1000) ? '+' : (' - ' + end_age)) %></td>
+      <td><%- d_work %></td>
+      <td><%- e_work %></td>
+      <td><%= uve %></td>
+    </tr>
+  </script>
+
+
+<script type="text/javascript">
+
+var selectedStartAge = -1;
+var disableAgeSectionFlag = 0;
+
+
+function initializeTable(){
+  if (disableAgeSectionFlag == 0){
+      $(".d_work").prop('disabled', false);
+      $(".e_work").prop('disabled', false);
+
+  disableAgeSectionFlag = 1;
+
+  }
+}
+
+
+var parse = function(s) {
+  var tmp = parseFloat(s);
+  return isNaN(tmp) ? 0 : tmp;
+}
+
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+
+var timeRows;
+
+var TimeRow = Backbone.Model.extend({
+  defaults: function() {
+    return {
+      start_age: "",
+      end_age: "",
+      d_work: "",
+      e_work: "",
+      location: "",
+      showsSeparator: false,
+      d_work_error: "",
+      e_work_error: ""
+    };
+  },
+});
+
+var TimeRowView = Backbone.View.extend({
+  tagName: "tr",
+  template: _.template($('#time-template').html()),
+  events: {
+    "focus .d_work": "focus",
+    "focus .e_work": "focus",
+    "blur .d_work": "close",
+    "blur .e_work": "close",
+  },
+  render: function() {
+    var o = this.model.toJSON();
+    this.$el.html(this.template(o));
+    this.d_work = this.$('.d_work');
+    this.e_work = this.$('.e_work');
+    return this;
+  },
+  render_error: function() {
+    var showError = function(error, el) {
+      if (error.length > 0) {
+        el.html("<br>" + error);
+      } else {
+        el.html('');
+      }
+    }
+    showError(this.model.get('d_work_error'), this.$('.d_work_error'));
+    showError(this.model.get('e_work_error'), this.$('.e_work_error'));
+  },
+  initialize: function() {
+    this.listenTo(this.model, 'change:d_work_error', this.render_error);
+    this.listenTo(this.model, 'change:e_work_error', this.render_error);
+    this.listenTo(this.model, 'destroy', this.remove);
+  },
+  focus: function() {
+    var start_age = this.model.get('start_age');
+    selectedStartAge = start_age;
+    drawTimeline();
+  },
+  close: function() {
+    this.model.set({d_work: this.d_work.val()});
+    this.model.set({e_work: this.e_work.val()});
+    selectedStartAge = -1;
+    drawTimeline();
+    validateAll(false);
+  },
+});
+
+var TimeRowList = Backbone.Collection.extend({
+  model: TimeRow,
+});
+
+timeRows = new TimeRowList;
+
+var timeAppView = Backbone.View.extend({
+  el: $("#timeapp"),
+  initialize: function() {
+    this.listenTo(timeRows, 'add', this.addOne);
+    timeRows.add([
+      {start_age: 0, end_age: 13},
+      {start_age: 13, end_age: 20},
+      {start_age: 20, end_age: 40},
+      {start_age: 40, end_age: 65},
+      {start_age: 65, end_age: 80},
+      {start_age: 80, end_age: 1000}
+    ]);
+  },
+  render: function() {
+  },
+  addOne: function(row) {
+    var view = new TimeRowView({model: row});
+    this.$("#time-list").append(view.render().el);
+  },
+});
+
+var timeApp = new timeAppView;
+
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+
+var rows;
+
+var Row = Backbone.Model.extend({
+  defaults: function() {
+    return {
+      location: "",
+      //order: 0,
+      start_age: "",
+      end_age: "",
+      resolved: false,
+      location_error: "",
+      start_age_error: "",
+      end_age_error: ""
+    };
+  },
+  isEmpty: function() {
+    return this.get('location') == '' && this.get('start_age') == '' && this.get('end_age') == '';
+  }
+});
+
+var citySource = function(q, cb) {
+  var matches = [];
+  q = q.replace(/^\s+/, '').toLowerCase();
+  var str;
+  for (var i = 0; i < cities.length; ++i) {
+    str = cities[i];
+    if (str.substring(0, q.length).toLowerCase() == q) {
+      matches.push({ value: str });
+      if (matches.length > 10)
+        break;
+    }
+  }
+  cb(matches);
+}
+
+var RowView = Backbone.View.extend({
+  tagName: "tr",
+  template: _.template($('#location-template').html()),
+  events: {
+    "keyup .location": "updateLocation",
+    "keydown .start_age": "updateStartAge",
+    "keydown .end_age": "updateEndAge",
+    "focus .location": "focus",
+    "focus .start_age": "focus",
+    "focus .end_age": "focus",
+    "blur .location": "close",
+    "blur .start_age": "close",
+    "blur .end_age": "close",
+  },
+  render: function() {
+    this.$el.html(this.template(this.model.toJSON()));
+    this.location = this.$('.location');
+    this.start_age = this.$('.start_age');
+    this.end_age = this.$('.end_age');
+
+    this.location.typeahead({
+      hint: false,
+      highlight: true,
+      minLength: 1
+    },
+    {
+      name: 'states',
+      displayKey: 'value',
+      source: citySource
+    });
+
+    return this;
+  },
+  render_error: function() {
+    var showError = function(error, el) {
+      if (error.length > 0) {
+        el.html("<br>" + error);
+      } else {
+        el.html('');
+      }
+    }
+    showError(this.model.get('location_error'), this.$('.location_error'));
+    showError(this.model.get('start_age_error'), this.$('.start_age_error'));
+    showError(this.model.get('end_age_error'), this.$('.end_age_error'));
+  },
+  render_resolved: function() {
+    this.$('.ok').css('visibility', this.model.get('resolved') ? 'visible' : 'hidden');
+  },
+
+  initialize: function() {
+    this.listenTo(this.model, 'change:start_age', this.startAgeChanged);
+    this.listenTo(this.model, 'change:end_age', this.endAgeChanged);
+    this.listenTo(this.model, 'change:location_error', this.render_error);
+    this.listenTo(this.model, 'change:start_age_error', this.render_error);
+    this.listenTo(this.model, 'change:end_age_error', this.render_error);
+    this.listenTo(this.model, 'change:resolved', this.render_resolved);
+    this.listenTo(this.model, 'destroy', this.remove);
+  },
+  startAgeChanged: function() {
+    this.$('.start_age').val(this.model.get('start_age'));
+  },
+  endAgeChanged: function() {
+    this.$('.end_age').val(this.model.get('end_age'));
+  },
+  updateLocation: function(e) {
+    this.model.set({resolved: false, location_error: ''});
+  },
+  updateStartAge: function(e) {
+    this.model.set({start_age_error: ''});
+  },
+  updateEndAge: function(e) {
+    this.model.set({end_age_error: ''});
+  },
+  focus: function() {
+    var order = this.model.get('order');
+    if (order == rows.length - 1) {
+      rows.add([{location: "", order: rows.length}]);
+    }
+
+    while (rows.models.length > order + 2 && rows.last().isEmpty() &&
+      rows.models[rows.models.length - 2].isEmpty() && rows.models.length > 3) {
+      rows.models[rows.models.length - 1].destroy();
+    }
+  },
+  close: function() {
+    this.model.set({
+      location: this.location.val(),
+      start_age: this.start_age.val(),
+      end_age: this.end_age.val()
+    });
+
+    var start_age = this.start_age.val();
+    var end_age = this.end_age.val();
+    var order = this.model.get('order');
+    var age = parse($("#age").val());
+    if (order > 0) {
+      if (age == 0 || start_age != '' || (age > 0 && rows.models[order - 1].get('end_age') < age))
+        rows.models[order - 1].set({end_age: start_age});
+    }
+    if (order < rows.models.length - 1) {
+      if (age == 0 || (age > 0 && end_age < age)) {
+        rows.models[order + 1].set({start_age: end_age});
+      } else if (age > 0 && end_age >= age) {
+        rows.models[order + 1].set({start_age: ""});
+      }
+    }
+
+    validateAll(false);
+    updateTime();
+
+    // TODO: purge rows
+  },
+});
+
+var RowList = Backbone.Collection.extend({
+  model: Row,
+});
+
+rows = new RowList;
+
+var LocationAppView = Backbone.View.extend({
+  el: $("#locationapp"),
+  initialize: function() {
+    this.listenTo(rows, 'add', this.addOne);
+    rows.add([
+      {order: 0, location: "", start_age: 0},
+      {order: 1, location: ""},
+      {order: 2, location: ""}
+    ]);
+  },
+  render: function() {
+  },
+  addOne: function(row) {
+    var view = new RowView({model: row});
+    this.$("#location-list").append(view.render().el);
+  },
+});
+
+var locationApp = new LocationAppView;
+
+
+// -----------------------------------------------------------------------------------
+// QUESTIONS & QUESTION VALIDATION ---------------------------------------------------
+// -----------------------------------------------------------------------------------
+
+function updateQuestions() {
+  if ($("input[name=family_skin_cancer]:checked").val() == 'yes') {
+    $('input[name=family_skin_cancer_type]').removeAttr('disabled');
+    $('#family_skin_cancer_specific').removeClass('specific-disabled');
+  } else {
+    $('input[name=family_skin_cancer_type]').attr('disabled','disabled');
+    $('#family_skin_cancer_specific').addClass('specific-disabled');
+
+    $('input[name=family_skin_cancer_type]').prop('checked', false);
+  }
+
+  if ($("input[name=skin_cancer]:checked").val() == 'yes') {
+    $('input[name=skin_cancer_age]').removeAttr('disabled');
+    $('input[name=skin_cancer_type]').removeAttr('disabled');
+    $('#skin_cancer_specific').removeClass('specific-disabled');
+    $('#skin_cancer_specific2').removeClass('specific-hidden');
+    //$('#feedback_number').text('14');
+    // FIXME: Don't repeat yourself
+    $('#question_tanning_bed').html('8. <u>Before</u> you were diagnosed with skin cancer, how many times did you use a tanning bed?');
+    $('#question_sunburn').html('9. <u>Before</u> you were diagnosed with skin cancer, how many blistering sunburns did you have?');
+    $('#question_sunscreen').html('10. <u>Before</u> you were diagnosed with skin cancer, how often did you use sunscreen when you were outside?');
+    $('#question9').html('11. <u>Before</u> you were diagnosed with skin cancer, how often did you do the following when you were outside during the summer on a warm sunny day?</p>');
+    $('.v_do').text('did');
+    $('.v_cover').text('covered');
+  } else {
+    $('input[name=skin_cancer_age]').attr('disabled','disabled');
+    $('input[name=skin_cancer_type]').attr('disabled','disabled');
+    $('#skin_cancer_specific').addClass('specific-disabled');
+    $('#skin_cancer_specific2').addClass('specific-hidden');
+    //$('#feedback_number').text('10');
+    // FIXME: Don't repeat yourself
+    $('#question_tanning_bed').html('8. How many times have you used a tanning bed in your life?');
+    $('#question_sunburn').html('9. How many blistering sunburns have you had in your lifetime?');
+    $('#question_sunscreen').html('10. When you are outdoors in the sun, how often do you use sunscreen?');
+    $('#question9').html('11. For the following questions, think about what you do when you are outside during the summer on a warm sunny day.');
+    $('.v_do').text('do');
+    $('.v_cover').text('cover');
+
+    $('input[name=skin_cancer_age]').val('');
+    $('input[name=skin_cancer_type]').prop('checked', false);
+  }
+}
+
+$('input[name=family_skin_cancer],input[name=skin_cancer]').change(function() {
+  updateQuestions();
+});
+
+updateQuestions();
+
+// -----------------------------------------------------------------------------------
+// VALIDATION ------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+
+function getQuestionData() {
+  return {
+    age: $("#age").val(),
+    skin_type: $("input[name=skin_type]:checked").val(),
+    family_skin_cancer: $("input[name=family_skin_cancer]:checked").val(),
+    family_skin_cancer_types: $("input[name=family_skin_cancer_type]:checked").map(function(_, el) { return $(el).val(); }).get(),
+    skin_cancer: $("input[name=skin_cancer]:checked").val(),
+    skin_cancer_age: $("input[name=skin_cancer_age]").val(),
+    skin_cancer_type: $("input[name=skin_cancer_type]:checked").val(),
+    tanning_bed: $("input[name=tanning_bed]:checked").val(),
+    sunburn: $("input[name=sunburn]:checked").val(),
+    sunscreen: $("input[name=sunscreen]:checked").val(),
+    q_shirt: $("input[name=q_shirt]:checked").val(),
+    q_hat: $("input[name=q_hat]:checked").val(),
+    q_shade: $("input[name=q_shade]:checked").val(),
+    af_tanning_bed: $("input[name=af_tanning_bed]:checked").val(),
+    af_sunburn: $("input[name=af_sunburn]:checked").val(),
+    af_sunscreen: $("input[name=af_sunscreen]:checked").val(),
+    af_q_shirt: $("input[name=af_q_shirt]:checked").val(),
+    af_q_hat: $("input[name=af_q_hat]:checked").val(),
+    af_q_shade: $("input[name=af_q_shade]:checked").val()
+  }
+}
+
+function validateAll(thorough, show) {
+  if (typeof(thorough) == 'undefined') thorough = false;
+  if (typeof(show) == 'undefined') show = true;
+  var success = true, messages = [];
+  var model, prevModel = null;
+
+  // validate questions
+  if (thorough) {
+    var questionData = getQuestionData();
+    var rules = {
+      age: [1, ''],
+      skin_type: [2, ''],
+      family_skin_cancer: [3, ''],
+      family_skin_cancer_types: [4, 'family_skin_cancer'],
+      skin_cancer: [5, ''],
+      skin_cancer_age: [6, 'skin_cancer'],
+      skin_cancer_type: [7, 'skin_cancer'],
+      tanning_bed: [8, ''],
+      sunburn: [9, ''],
+      sunscreen: [10, ''],
+      q_shirt: [11, ''],
+      q_hat: [11, ''],
+      q_shade: [11, ''],
+      af_tanning_bed: [12, 'skin_cancer'],
+      af_sunburn: [13, 'skin_cancer'],
+      af_sunscreen: [14, 'skin_cancer'],
+      af_q_shirt: [15, 'skin_cancer'],
+      af_q_hat: [15, 'skin_cancer'],
+      af_q_shade: [15, 'skin_cancer']
+    }
+    var problems = [];
+    for (var k in rules) {
+      var unacceptableAnswer = (k == 'age' || k == 'skin_cancer_age') ? '' : undefined;
+      if (questionData[k] === unacceptableAnswer) {
+        var dependent = rules[k][1];
+        if (dependent != '' && questionData[dependent] != 'yes')
+          continue;
+        problems.push(rules[k][0]);
+      }
+    }
+    if (problems.length > 0) {
+      problems = _.uniq(problems);
+      messages.push('Please answer all the questions in the survey. ' +
+        "(You haven't answered or completed question" + ((problems.length == 1) ? '' : 's') +
+        ' #' + problems.join(', ') + ".)");
+      success = false;
+    }
+  }
+
+  // validate age
+  var age = parseFloat($("input[name=age]").val());
+  var skin_cancer_age = parseFloat($("input[name=skin_cancer_age]").val());
+  if (!isNaN(age) && !isNaN(skin_cancer_age) && age < skin_cancer_age) {
+    $('#skin_cancer_age_error').text('This cannot be greater than your age.');
+    messages.push('The age you were diagnosed with skin cancer cannot be greater than your age.');
+    success = false;
+  } else {
+    $('#skin_cancer_age_error').text('');
+  }
+
+  // validate location
+  var locationErrorMessage = "Please fix the error in the Exposure Location Data section.";
+  for (var i = 0; i < rows.models.length; ++i) {
+    model = rows.models[i];
+    if (show) model.set({start_age_error: ''});
+    if (show) model.set({end_age_error: ''});
+
+    if (model.isEmpty()) continue;
+
+    var x = parseFloat(model.get('start_age'));
+    var y = parseFloat(model.get('end_age'));
+
+    if (thorough) {
+      if (model.get('location').length == 0) {
+        if (show) model.set({location_error: "Can't be blank"});
+        messages.push(locationErrorMessage);
+        success = false;
+      }
+      if (model.get('start_age').length == 0) {
+        if (show) model.set({start_age_error: "Can't be blank"});
+        messages.push(locationErrorMessage);
+        success = false;
+      }
+      if (model.get('end_age').length == 0) {
+        if (show) model.set({end_age_error: "Can't be blank"});
+        messages.push(locationErrorMessage);
+        success = false;
+      }
+    }
+
+    if (!isNaN(x) && !isNaN(y) && x >= y) {
+      if (show) model.set({start_age_error: ' '});
+      if (show) model.set({end_age_error: 'Must be greater than ' + x});
+      messages.push(locationErrorMessage);
+      success = false;
+    }
+
+    if (prevModel) {
+      var y0 = parseFloat(prevModel.get('end_age'));
+      if (!isNaN(x) && !isNaN(y0) && x < y0) {
+        if (show) model.set({start_age_error: 'Must be at least ' + y0});
+        messages.push(locationErrorMessage);
+        success = false;
+      }
+    }
+    prevModel = model;
+  }
+
+  // validate time
+  var timeErrorMessage = "Please fix the error in the Estimated Outdoor Exposure Time section.";
+  for (var i = 0; i < timeRows.models.length; ++i) {
+    model = timeRows.models[i];
+    if (show) model.set({d_work_error: ''});
+    if (show) model.set({e_work_error: ''});
+
+    if (thorough) {
+      if (model.get('d_work').length == 0) {
+        if (show) model.set({d_work_error: "Can't be blank"});
+        messages.push(timeErrorMessage);
+        success = false;
+      }
+      if (model.get('e_work').length == 0) {
+        if (show) model.set({e_work_error: "Can't be blank"});
+        messages.push(timeErrorMessage);
+        success = false;
+      }
+    }
+
+    var d_work = parseFloat(model.get('d_work'));
+    var e_work = parseFloat(model.get('e_work'));
+
+    if (!isNaN(d_work) && d_work > 6) {
+      if (show) model.set({d_work_error: 'Must not be greater than 6.<br>Please fill the hours between<br>10 AM - 4 PM.'});
+      messages.push(timeErrorMessage);
+      success = false;
+    }
+    if (!isNaN(e_work) && e_work > 6) {
+      if (show) model.set({e_work_error: 'Must not be greater than 6.<br>Please fill the hours between<br>10 AM - 4 PM.'});
+      messages.push(timeErrorMessage);
+      success = false;
+    }
+  }
+
+  messages = _.uniq(messages);
+  return {ok: success, messages: messages};
+}
+
+function okToUpdateTime() {
+  var success = true;
+  var model, prevModel = null;
+
+  // validate location
+  for (var i = 0; i < rows.models.length; ++i) {
+    model = rows.models[i];
+    if (model.isEmpty()) continue;
+    var x = parseFloat(model.get('start_age'));
+    var y = parseFloat(model.get('end_age'));
+    if (!isNaN(x) && !isNaN(y) && x >= y) {
+      success = false;
+    }
+    if (prevModel) {
+      var y0 = parseFloat(prevModel.get('end_age'));
+      if (!isNaN(x) && !isNaN(y0) && x < y0) {
+        success = false;
+      }
+    }
+    prevModel = model;
+  }
+
+  return success;
+}
+
+// TODO: can't copy & paste in Firefox
+function isNumber(evt) {
+  evt = evt ? evt : window.event;
+  var target = $(evt.target);
+  target.tooltip({
+    container: 'body',
+    html: 'true',
+    title: '<span style=\"font-size: 14px;\">Must be a number</span>',
+    trigger: 'manual',
+  });
+
+  var charCode = (evt.which) ? evt.which : evt.keyCode; // 46 = dot
+  if (charCode > 31 &&
+    (
+      ((charCode < 48 || charCode > 57) && charCode != 46) ||
+      (charCode == 46 && target.val().indexOf('.') != -1)
+    )
+    ) {
+    target.tooltip('show');
+    setTimeout(function() {
+      target.tooltip('hide');
+    }, 1500);
+    return false;
+  }
+  return true;
+}
+
+
+// -----------------------------------------------------------------------------------
+// DYNAMIC ---------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+
+$('#age').change(function() {
+  updateTime();
+  validateAll(false);
+});
+
+$('#skin_cancer_age').blur(function() {
+  updateTime();
+  validateAll(false);
+});
+
+
+function clone(o) {
+  return JSON.parse(JSON.stringify(o)); // TODO: hacky
+}
+
+// create a JSON object for calculation
+function getTimeData() {
+  var timeData = [], model, o;
+  for (var i = 0; i < timeRows.models.length; ++i) {
+    model = timeRows.models[i];
+    o = model.toJSON();
+    o.d_work = parse(o.d_work);
+    o.e_work = parse(o.e_work);
+    timeData.push(o);
+  }
+//   for (var i = 0; i < timeData.length - 1; ++i) {
+//     o = timeData[i];
+//     p = timeData[i + 1];
+//     if (o.end_age < p.start_age)
+//       o.end_age++;
+//   }
+  return timeData;
+}
+
+// create a JSON object for calculation
+function getLocationData() {
+  var locationData = [], model, o, p;
+  var age = parse($("#age").val());
+  for (var i = 0; i < rows.models.length; ++i) {
+    model = rows.models[i];
+    if (model.isEmpty()) continue;
+    o = model.toJSON();
+    if (o.start_age.length == 0) continue;
+    if (o.end_age.length == 0) continue;
+    o.start_age = parse(o.start_age);
+    o.end_age = parse(o.end_age);
+    locationData.push(o);
+    if (age > 0 && o.end_age > age) {
+      o.end_age = age;
+      break;
+    }
+  }
+
+  // fill the gap
+  for (var i = 0; i < locationData.length - 1; ++i) {
+    o = locationData[i];
+    p = locationData[i + 1];
+    //if (o.end_age + 1 == p.start_age) {
+    //  o.end_age++;
+    //} else if (o.end_age + 1 < p.start_age) { // TODO: shouldn't have to check this!
+    if (o.end_age < p.start_age) {
+      locationData.splice(i+1, 0, {
+        location: '',
+        coordinates: [0, 0],
+        uvi: 0,
+        start_age: o.end_age,
+        end_age: p.start_age,
+      });
+      i++;
+    }
+  }
+  return locationData;
+}
+
+function updateTime() {
+  if (!okToUpdateTime())
+    return;
+
+  var model, o, p, i, j;
+
+  //var timeData = getTimeData();
+  var timeData = [];
+  for (var i = 0; i < timeRows.models.length; ++i) {
+    model = timeRows.models[i];
+    o = model.toJSON();
+    //o.d_work = parse(o.d_work);
+    //o.e_work = parse(o.e_work);
+    timeData.push(o);
+  }
+  var locationData = getLocationData();
+
+  var newTimeData = [
+    {start_age: 0, end_age: 13},
+    {start_age: 13, end_age: 20},
+    {start_age: 20, end_age: 40},
+    {start_age: 40, end_age: 65},
+    {start_age: 65, end_age: 80},
+    {start_age: 80, end_age: 1000}
+  ];
+
+  var age = parse($("#age").val());
+  if (age > 0) {
+    if (age > 200) age = 200; // TODO: ???
+    while (newTimeData[newTimeData.length-1].start_age >= age) {
+      newTimeData.pop();
+    }
+    newTimeData[newTimeData.length-1].end_age = age;
+  }
+
+
+  // gather breakpoints
+  var bps = [];
+  for (var i = 0; i < locationData.length; ++i) {
+    o = locationData[i];
+    bps.push(o.start_age);
+    bps.push(o.end_age);
+  }
+  var skin_cancer_age = parse($("input[name=skin_cancer_age]").val());
+  if (skin_cancer_age > 0)
+    bps.push(skin_cancer_age);
+  bps = _.uniq(bps);
+  bps.sort(function(a, b) { return a - b; });
+
+  // splits newTimeData along breakpoints;
+  i = 0;
+  j = 0;
+  while (i < newTimeData.length && j < bps.length) {
+    o = newTimeData[i];
+    if (o.end_age <= bps[j]) {
+      i++;
+    } else if (o.start_age >= bps[j]) {
+      j++;
+    } else {
+      p = clone(o);
+      p.end_age = bps[j];
+      o.start_age = p.end_age;
+      newTimeData.splice(i, 0, p);
+    }
+  }
+
+  // restore data from timeData
+  var ds = new Array(200), es = new Array(200);
+  for (i = 0; i < 200; ++i) {
+    ds[i] = 0;
+    es[i] = 0;
+  }
+  for (i = 0; i < timeData.length; ++i) {
+    var start_age = timeData[i].start_age;
+    var end_age = Math.min(timeData[i].end_age, 199);
+    var d_work = timeData[i].d_work;
+    var e_work = timeData[i].e_work;
+    for (j = start_age; j < end_age; ++j) {
+      ds[j] = d_work;
+      es[j] = e_work;
+    }
+  }
+  for (i = 0; i < newTimeData.length; ++i) {
+    var start_age = newTimeData[i].start_age;
+    var end_age = Math.min(newTimeData[i].end_age, 199);
+    var d_work = ds[start_age];
+    var same = true;
+    for (j = start_age + 1; j < end_age; ++j) {
+      if (ds[j] != d_work) {
+        same = false;
+        break;
+      }
+    }
+    if (same)
+      newTimeData[i].d_work = d_work;
+  }
+  for (i = 0; i < newTimeData.length; ++i) {
+    var start_age = newTimeData[i].start_age;
+    var end_age = Math.min(newTimeData[i].end_age, 199);
+    var e_work = es[start_age];
+    var same = true;
+    for (j = start_age + 1; j < end_age; ++j) {
+      if (es[j] != e_work) {
+        same = false;
+        break;
+      }
+    }
+    if (same)
+      newTimeData[i].e_work = e_work;
+  }
+
+
+  // assign locations
+  j = 0;
+  for (i = 0; i < locationData.length; ++i) {
+    o = locationData[i];
+    while (j < newTimeData.length &&
+      (p = newTimeData[j], (p.start_age < o.end_age))) {
+      if (o.start_age < p.end_age)
+        newTimeData[j].location = o.location;
+      j++;
+    }
+  }
+
+  // clean up location fields
+  for (i = newTimeData.length - 1; i > 0; --i) {
+    o = newTimeData[i];
+    p = newTimeData[i - 1];
+    if (o.location == p.location) {
+      o.location = "";
+    } else {
+      o.showsSeparator = true;
+    }
+  }
+
+  // set new time data
+  while (timeRows.models.length) {
+    timeRows.models[timeRows.models.length-1].destroy();
+  }
+  timeRows.add(newTimeData);
+
+  // redraw time line
+  drawTimeline();
+}
+
+var timeline = SVG('timeline');
+if (timeline)
+  timeline.size(620, 24);
+
+function drawTimeline() {
+  if (!timeline)
+    return;
+  var timeData = getTimeData();
+  timeline.clear();
+  var age = parse($("#age").val());
+  if (age == 0)
+    age = 85;
+
+  //var rect = timeline.rect(100, 100).attr({ fill: '#f06' })
+  var o, i, x;
+  var x0 = 10;
+  var xScale = (timeline.width() - x0 - 10) / age;
+  var y = 8;
+
+  timeline.line(x0, y, x0 + age * xScale, y).attr({stroke: '#ccc', 'shape-rendering': 'crispEdges'});
+  var drawTick = function (age) {
+    var x = x0 + age * xScale;
+    timeline.text(age + "").attr({
+      x: x,
+      y: y-1
+    }).font({
+      anchor: 'middle',
+      fill: '#333',
+      size: '13px'
+    });
+    timeline.line(x, y-5, x, y+5).attr({stroke: '#aaa', 'shape-rendering': 'crispEdges'});
+  }
+  for (i = 0; i < timeData.length; ++i) {
+    o = timeData[i];
+    if (i == 0)
+      drawTick(o.start_age);
+    drawTick(o.end_age);
+
+    if (o.start_age == selectedStartAge) {
+      timeline.line(x0 + o.start_age * xScale, y, x0 + o.end_age * xScale, y).attr({stroke: '#5bc0de', 'stroke-width': 6});
+    }
+  }
+}
+
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
+
+
+
+var markers = [];
+
+function calculateCLUE() {
+  var validateResult = validateAll(true);
+  if (!validateResult.ok) {
+    alert(validateResult.messages.join('\n\n'));
+    return;
+  }
+
+  $('#calculate').addClass('disabled');
+
+  var nRequests = 0;
+  var nUnsuccessfulRequests = 0;
+  var requests = [];
+
+  var model, o, p;
+
+  var unresolvedModels = [];
+  for (var i = 0; i < rows.models.length; ++i) {
+    model = rows.models[i];
+    if (model.isEmpty()) continue;
+    if (!model.get('resolved')) {
+      nRequests++;
+      unresolvedModels.push(model);
+    }
+  }
+
+  var done = function () {
+
+    if (nUnsuccessfulRequests) {
+      alert("Can't find all the locations.");
+      $('#calculate').removeClass('disabled');
+      return;
+    }
+
+    var parse = function(s) {
+      var tmp = parseFloat(s);
+      return isNaN(tmp) ? 0 : tmp;
+    }
+
+    var timeData = getTimeData();
+    var locationData = getLocationData();
+
+    for (var i = 0; i < timeData.length; ++i) {
+      o = timeData[i];
+      o.uve = 52 * (5 * o.d_work + 2 * o.e_work);
+    }
+
+    var cleanAndCalculate = function(locationData, timeData) {
+      // This function calculates C and NC scores and
+      // also splits locationData along timeData's boundaries.
+      var i = 0, j = 0;
+      var o, p;
+      while (i < locationData.length) {
+        o = locationData[i];
+        // FIXME: error if j >= timeData.length
+        if (o.end_age <= timeData[j].end_age) {
+          o.nc = (o.uvi == 0) ? 0 : (timeData[j].uve * (o.end_age - o.start_age));
+          o.c = o.nc * o.uvi;
+          i++;
+        } else {
+          if (o.start_age < timeData[j].end_age) {
+            p = clone(o);
+            p.end_age = timeData[j].end_age;
+            o.start_age = p.end_age;
+            locationData.splice(i, 0, p);
+          } else {
+            j++;
+          }
+        }
+      }
+    }
+
+    // calculate
+    var originalLocationData = clone(locationData);
+    cleanAndCalculate(locationData, timeData);
+
+    // calculate C and NC for people who had skin cancer
+    var totalCSkinCancer = 0, totalNCSkinCancer = 0;
+    if ($("input[name=skin_cancer]:checked").val() == 'yes' && locationData.length) {
+      var skin_cancer_age = parse($("input[name=skin_cancer_age]").val());
+      if (skin_cancer_age > 0) {
+        var locationDataSkinCancer = clone(originalLocationData);
+        for (var i = locationDataSkinCancer.length - 1; i >= 0; --i) {
+          o = locationDataSkinCancer[i];
+          if (o.start_age > skin_cancer_age) {
+            locationDataSkinCancer.pop();
+          } else {
+            o.end_age = Math.min(skin_cancer_age, o.end_age);
+            break;
+          }
+        }
+        cleanAndCalculate(locationDataSkinCancer, timeData);
+        for (var i = 0; i < locationDataSkinCancer.length; ++i) {
+          o = locationDataSkinCancer[i];
+          totalCSkinCancer += o.c;
+          totalNCSkinCancer += o.nc;
+        }
+      }
+    }
+
+    var totalC = 0, totalNC = 0;
+    for (var i = 0; i < locationData.length; ++i) {
+      o = locationData[i];
+      totalC += o.c;
+      totalNC += o.nc;
+    }
+    //$('#total-c').text(addCommaToNumber(Math.round(totalC)));
+    //$('#total-nc').text(addCommaToNumber(totalNC));
+
+
+    // for saving purpose
+    j = 0;
+    for (var i = 0; i < timeData.length; ++i) {
+      o = timeData[i];
+      o.nc = 0;
+      o.c = 0;
+      while (j < locationData.length && locationData[j].end_age <= o.end_age) {
+        o.nc += locationData[j].nc;
+        o.c += locationData[j].c;
+        j++;
+      }
+    }
+
+    // TODO: use getQuestionData() and $.extend()
+    var data = {
+      age: $("#age").val(),
+      skin_type: $("input[name=skin_type]:checked").val(),
+      family_skin_cancer: $("input[name=family_skin_cancer]:checked").val(),
+      family_skin_cancer_types: $("input[name=family_skin_cancer_type]:checked").map(function(_, el) { return $(el).val(); }).get(),
+      skin_cancer: $("input[name=skin_cancer]:checked").val(),
+      skin_cancer_age: $("input[name=skin_cancer_age]").val(),
+      skin_cancer_type: $("input[name=skin_cancer_type]:checked").val(),
+      tanning_bed: $("input[name=tanning_bed]:checked").val(),
+      sunburn: $("input[name=sunburn]:checked").val(),
+      sunscreen: $("input[name=sunscreen]:checked").val(),
+      q_shirt: $("input[name=q_shirt]:checked").val(),
+      q_hat: $("input[name=q_hat]:checked").val(),
+      q_shade: $("input[name=q_shade]:checked").val(),
+      af_tanning_bed: $("input[name=af_tanning_bed]:checked").val(),
+      af_sunburn: $("input[name=af_sunburn]:checked").val(),
+      af_sunscreen: $("input[name=af_sunscreen]:checked").val(),
+      af_q_shirt: $("input[name=af_q_shirt]:checked").val(),
+      af_q_hat: $("input[name=af_q_hat]:checked").val(),
+      af_q_shade: $("input[name=af_q_shade]:checked").val(),
+      time_data: timeData,
+      location_data: originalLocationData,
+      debug_location_data: locationData,
+      total_c: totalC,
+      total_nc: totalNC,
+      total_c_skin_cancer: totalCSkinCancer,
+      total_nc_skin_cancer: totalNCSkinCancer,
+      feedback: $("#feedback").val(),
+    };
+
+    alert('Your CUES is ' + totalC);
+
+    /*
+    $.ajax({
+      url: "/home/save_data",
+      method: 'post',
+      data: {data: JSON.stringify(data)},
+      success: function (o) {
+        window.location.href = '/home/thanks';
+      },
+      error: function (jqXHR, textStatus, errorThrown) {
+        alert(errorThrown);
+        $('#calculate').removeClass('disabled');
+      }
+    });
+    */
+  };
+
+  if (nRequests == 0) {
+    done();
+  } else {
+    $.each(unresolvedModels, function(i, model) {
+      geocode(model.get('location'), function(success, uvi, coordinates) {
+        nRequests--;
+        if (success) {
+          model.set({resolved: true, uvi: uvi, coordinates: coordinates});
+        } else {
+          model.set({location_error: "Can't find \"" + model.get('location') + "\""});
+          nUnsuccessfulRequests++;
+        }
+        if (nRequests == 0) {
+          done();
+        }
+      });
+    });
+  }
+}
+
+var geocoder = new google.maps.Geocoder();
+
+function geocode(address, callback) {
+  geocoder.geocode( {'address': address}, function(results, status) {
+    if (status == google.maps.GeocoderStatus.OK) {
+      var result = results[0];
+      var location = result.geometry.location;
+      var uvi = 0;
+
+      var address_component;
+      for (var i = 0; i < result.address_components.length; ++i) {
+        address_component = result.address_components[i];
+        if ($.inArray('country', address_component.types) != -1 && address_component.short_name == 'US') {
+          var closestIndex = findClosestAnchor(location);
+          uvi = anchors[closestIndex].uvi;
+          break;
+        }
+      }
+      callback(true, uvi, [location.lat(), location.lng()]);
+    } else {
+      console.log('Geocode was not successful for the following reason: ' + status);
+      callback(false);
+    }
+  });
+}
+
+
+function toggleDetail() {
+  $('#detail').toggle();
+  $('#toggle-detail').text($('#detail').is(":visible") ? 'Hide calculation details' : 'Show calculation details');
+}
+
+function addCommaToNumber(val){
+  while (/(\d+)(\d{3})/.test(val.toString())) {
+    val = val.toString().replace(/(\d+)(\d{3})/, '$1'+','+'$2');
+  }
+  return val;
+}
+
+// --------------------------------------------------------------------------------------------
+
+var anchors = [];
+
+function anchor (name, place, uvi, uvisd){
+  this.name = name;
+  this.place = place;
+  this.uvi = uvi;
+  this.uvisd = uvisd;
+}
+
+function initialize() {
+  if (typeof(Number.prototype.toRad) == "undefined") {
+    Number.prototype.toRad = function() {
+      return this * Math.PI / 180;
+    }
+  }
+  anchors[0] = new anchor("Anchorage, AK", new google.maps.LatLng(61.2180556, -149.90027780000003), 1.8771353446377, 0.0941944688374116);
+  anchors[1] = new anchor("Mobile, AL", new google.maps.LatLng(30.6943566, -88.0430541), 6.99169760633009, 0.361432294330915);
+  anchors[2] = new anchor("Little Rock, AR", new google.maps.LatLng(34.7464809, -92.28959479999997), 5.68693868312647, 0.355749024951511);
+  anchors[3] = new anchor("Phoenix, AZ", new google.maps.LatLng(33.4483771, -112.07403729999999), 6.93812541385763, 0.344929966758139);
+  anchors[4] = new anchor("Los Angeles, CA", new google.maps.LatLng(34.0522342, -118.2436849), 6.9393429783746, 0.243801093659775);
+  anchors[5] = new anchor("San Francisco, CA", new google.maps.LatLng(37.7749295, -122.41941550000001), 5.69740176712299, 0.262269072636097);
+  anchors[6] = new anchor("Denver, CO", new google.maps.LatLng(39.737567, -104.98471790000002), 5.89226340757978, 0.256272517460823);
+  anchors[7] = new anchor("Hartford, CT", new google.maps.LatLng(41.76371109999999, -72.68509319999998), 4.22672813838915, 0.203738763364689);
+  anchors[8] = new anchor("Washington, DC", new google.maps.LatLng(38.90723089999999, -77.03646409999999), 4.71070047932166, 0.249665467913306);
+  anchors[9] = new anchor("Dover, DE", new google.maps.LatLng(39.158168, -75.52436820000003), 4.5991097619854, 0.311636931010691);
+  anchors[10] = new anchor("Jacksonville, FL", new google.maps.LatLng(30.3321838, -81.65565099999998), 7.09401420015119, 0.214101831034288);
+  anchors[11] = new anchor("Miami, FL", new google.maps.LatLng(25.7889689, -80.22643929999998), 8.49667371888722, 0.166440998707845);
+  anchors[12] = new anchor("Tampa, FL", new google.maps.LatLng(27.950575, -82.45717760000002), 7.76572074393997, 0.229518020912197);
+  anchors[13] = new anchor("Atlanta, GA", new google.maps.LatLng(33.7489954, -84.3879824), 5.98641447813521, 0.425791266524952);
+  anchors[14] = new anchor("Honolulu, HI", new google.maps.LatLng(21.3069444, -157.85833330000003), 9.37775280498836, 0.129399577036528);
+  anchors[15] = new anchor("Des Moines, IA", new google.maps.LatLng(41.6005448, -93.60910639999997), 4.40568787948717, 0.147267152479771);
+  anchors[16] = new anchor("Boise, ID", new google.maps.LatLng(43.6187102, -116.21460680000001), 4.78647280238093, 0.258540033772576);
+  anchors[17] = new anchor("Chicago, IL", new google.maps.LatLng(41.8781136, -87.62979819999998), 4.23987074547039, 0.281434514296989);
+  anchors[18] = new anchor("Indianapolis, IN", new google.maps.LatLng(39.768403, -86.15806800000001), 4.6062219376049, 0.306086245149201);
+  anchors[19] = new anchor("Wichita, KS", new google.maps.LatLng(37.68888889999999, -97.33611109999998), 5.21848755746084, 0.222250439900723);
+  anchors[20] = new anchor("Louisville, KY", new google.maps.LatLng(38.2526647, -85.75845570000001), 4.83281578196086, 0.302247966323691);
+  anchors[21] = new anchor("New Orleans, LA", new google.maps.LatLng(29.95106579999999, -90.0715323), 7.34517383984514, 0.192206003452818);
+  anchors[22] = new anchor("Boston, MA", new google.maps.LatLng(42.3584308, -71.0597732), 4.21412873959406, 0.212939946089521);
+  anchors[23] = new anchor("Baltimore, MD", new google.maps.LatLng(39.2903848, -76.61218930000001), 4.62674081014582, 0.25041388660887);
+  anchors[24] = new anchor("Portland, ME", new google.maps.LatLng(43.66147100000001, -70.2553259), 3.83323922076223, 0.167681547205218);
+  anchors[25] = new anchor("Detroit, MI", new google.maps.LatLng(42.331427, -83.0457538), 4.04100135289314, 0.253487084710969);
+  anchors[26] = new anchor("Minneapolis, MN", new google.maps.LatLng(44.983334, -93.26666999999998), 3.85650039932282, 0.107660787787273);
+  anchors[27] = new anchor("St. Louis, MO", new google.maps.LatLng(38.6270025, -90.1994042), 4.91900270365961, 0.268721261055546);
+  anchors[28] = new anchor("Jackson, MS", new google.maps.LatLng(32.2987573, -90.18481029999998), 6.46150532422559, 0.290171399185667);
+  anchors[29] = new anchor("Billings, MT", new google.maps.LatLng(45.7832856, -108.5006904), 4.39514553786162, 0.186618610616946);
+  anchors[30] = new anchor("Raleigh, NC", new google.maps.LatLng(35.7795897, -78.63817870000003), 5.54510015374996, 0.27886413330851);
+  anchors[31] = new anchor("Bismarck, ND", new google.maps.LatLng(46.8083268, -100.78373920000001), 3.9111812684323, 0.199698339508765);
+  anchors[32] = new anchor("Omaha, NE", new google.maps.LatLng(41.2523634, -95.99798829999997), 4.53869076728424, 0.190962100567503);
+  anchors[33] = new anchor("Concord, NH", new google.maps.LatLng(43.2081366, -71.53757180000002), 3.97383669658251, 0.194861593555015);
+  anchors[34] = new anchor("Atlantic City, NJ", new google.maps.LatLng(39.3642834, -74.42292659999998), 4.63895384418092, 0.319177873857818);
+  anchors[35] = new anchor("Albuquerque, NM", new google.maps.LatLng(35.110703, -106.60999099999998), 7.06754535400047, 0.406758951302654);
+  anchors[36] = new anchor("Las Vegas, NV", new google.maps.LatLng(36.114646, -115.17281600000001), 6.2806703849543, 0.232346040418651);
+  anchors[37] = new anchor("Buffalo, NY", new google.maps.LatLng(42.88644679999999, -78.8783689), 4.01281893094337, 0.242336109545002);
+  anchors[38] = new anchor("New York, NY", new google.maps.LatLng(40.7143528, -74.0059731), 4.4304686479075, 0.254456871969045);
+  anchors[39] = new anchor("Cleveland, OH", new google.maps.LatLng(41.4994954, -81.6954088), 4.2406486791056, 0.287714008691697);
+  anchors[40] = new anchor("Oklahoma City, OK", new google.maps.LatLng(35.4675602, -97.51642759999999), 5.64239354734025, 0.245035990121384);
+  anchors[41] = new anchor("Portland, OR", new google.maps.LatLng(45.5234515, -122.6762071), 3.55015852020372, 0.242493040092435);
+  anchors[42] = new anchor("Philadelphia, PA", new google.maps.LatLng(39.952335, -75.16378900000001), 4.41173721008709, 0.257418967294819);
+  anchors[43] = new anchor("Pittsburgh, PA", new google.maps.LatLng(40.44062479999999, -79.99588640000002), 4.25916065609887, 0.291240072931624);
+  anchors[44] = new anchor("San Juan, PR", new google.maps.LatLng(18.4663338, -66.1057217), 10.2888297136866, 0.129747253692345);
+  anchors[45] = new anchor("Providence, RI", new google.maps.LatLng(41.8239891, -71.41283429999999), 4.25545103210342, 0.221735674527966);
+  anchors[46] = new anchor("Charleston, SC", new google.maps.LatLng(32.7765656, -79.93092159999998), 6.35264708202032, 0.309244037662816);
+  anchors[47] = new anchor("Sioux Falls, SD", new google.maps.LatLng(43.5499749, -96.70032700000002), 4.17895327721649, 0.17862394140522);
+  anchors[48] = new anchor("Memphis, TN", new google.maps.LatLng(35.1495343, -90.0489801), 5.60720237401306, 0.272849975711269);
+  anchors[49] = new anchor("Dallas, TX", new google.maps.LatLng(32.7801399, -96.80045109999998), 6.02434279538013, 0.216509390235739);
+  anchors[50] = new anchor("Houston, TX", new google.maps.LatLng(29.7601927, -95.36938959999998), 6.90539348846443, 0.201026025806136);
+  anchors[51] = new anchor("Salt Lake City, UT", new google.maps.LatLng(40.7607793, -111.89104739999999), 5.72239076420379, 0.27183043134687);
+  anchors[52] = new anchor("Norfolk, VA", new google.maps.LatLng(36.8507689, -76.2858726), 5.37551979739632, 0.299473361294144);
+  anchors[53] = new anchor("Burlington, VT", new google.maps.LatLng(44.4758825, -73.21207199999998), 3.6274031441389, 0.315969938687122);
+  anchors[54] = new anchor("Seattle, WA", new google.maps.LatLng(47.6062095, -122.3320708), 3.37310198562014, 0.203350293515585);
+  anchors[55] = new anchor("Milwaukee, WI", new google.maps.LatLng(43.0389025, -87.90647360000003), 4.08636668364931, 0.245208533061033);
+  anchors[56] = new anchor("Charleston, WV", new google.maps.LatLng(38.3498195, -81.6326234), 4.68838477691702, 0.266749990771736);
+  anchors[57] = new anchor("Cheyenne, WY", new google.maps.LatLng(41.1399814, -104.82024619999999), 5.50418998673153, 0.328838871660807);
+
+  drawTimeline();
+}
+
+initialize();
+
+function findClosestAnchor(location) {
+  var closestIndex = -1;
+  var distance;
+  var closestDistance = Infinity;
+
+  for (var i = 0; i < anchors.length; i++){
+    distance = calcHaversine(anchors[i].place, location);
+    if (distance <= closestDistance) {
+      closestIndex = i;
+      closestDistance = distance;
+    }
+  }
+
+  return closestIndex;
+}
+
+function calcHaversine(latlng1, latlng2){ 
+  //http://www.movable-type.co.uk/scripts/latlong.html
+
+  var lat1 = latlng1.lat();
+  var lon1 = latlng1.lng();
+  var lat2 = latlng2.lat();
+  var lon2 = latlng2.lng();
+  var R = 6371; // km
+  var dLat = (lat2-lat1).toRad();
+  var dLon = (lon2-lon1).toRad();
+  var lat1 = lat1.toRad();
+  var lat2 = lat2.toRad();
+  var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.sin(dLon/2) * Math.sin(dLon/2) * Math.cos(lat1) * Math.cos(lat2); 
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+  var d = R * c;
+  return d;
+}
+</script>
+
+
+</div>
+
+<script src="js/bootstrap.min.js"></script>
+
+</body>
+</html>
