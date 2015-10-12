@@ -1522,7 +1522,7 @@ function calculateCLUE() {
       feedback: $("#feedback").val(),
     };
 
-    alert('Your CUES is ' + totalC);
+    alert('Your CUES is ' + Math.round(totalC/1000)*1000);
 
     /*
     $.ajax({
