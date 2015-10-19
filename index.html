@@ -153,12 +153,12 @@
   <p class="question">2. How would you rate your skin type - do you burn or tan in the sun?</p>
 
   <div class="radio">
-    <label><input type="radio" name="skin_type" value="1" onclick="initializeTable()" />Type I - Always burns, never tans (pale white skin)</label><br>
-    <label><input type="radio" name="skin_type" value="2" onclick="initializeTable()" />Type II - Burns easily, tans minimally (white skin)</label><br>
-    <label><input type="radio" name="skin_type" value="3" onclick="initializeTable()" />Type III - Burns moderately, tans uniformly (light brown skin)</label><br>
-    <label><input type="radio" name="skin_type" value="4" onclick="initializeTable()" />Type IV - Burns minimally, tans well (moderate brown skin)</label><br>
-    <label><input type="radio" name="skin_type" value="5" onclick="initializeTable()" />Type V - Rarely burns, tans profusely (dark brown skin)</label><br>
-    <label><input type="radio" name="skin_type" value="6" onclick="initializeTable()" />Type VI - Never burns (deeply pigmented dark brown to black skin)</label>
+    <label><input type="radio" name="skin_type" value="1" onclick="initializeTable()" disabled="disabled"/>Type I - Always burns, never tans (pale white skin)</label><br>
+    <label><input type="radio" name="skin_type" value="2" onclick="initializeTable()" disabled="disabled"/>Type II - Burns easily, tans minimally (white skin)</label><br>
+    <label><input type="radio" name="skin_type" value="3" onclick="initializeTable()" disabled="disabled"/>Type III - Burns moderately, tans uniformly (light brown skin)</label><br>
+    <label><input type="radio" name="skin_type" value="4" onclick="initializeTable()" disabled="disabled"/>Type IV - Burns minimally, tans well (moderate brown skin)</label><br>
+    <label><input type="radio" name="skin_type" value="5" onclick="initializeTable()" disabled="disabled"/>Type V - Rarely burns, tans profusely (dark brown skin)</label><br>
+    <label><input type="radio" name="skin_type" value="6" onclick="initializeTable()" disabled="disabled"/>Type VI - Never burns (deeply pigmented dark brown to black skin)</label>
   </div>
 
 
@@ -449,10 +449,18 @@
     </div>
   </div>
 
+<br><br>
+<br><br>
 
-  <p><br>
-  </p>
-  <p><strong>Table 1. How your CUES compares to individuals in the study. *The CUES reported  in this table have been rounded to the nearest thousand.</strong></p>
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title">Interpreting the CUES</h3>
+    </div>
+    <div class="panel-body">
+<div class="resultsCUES" style="color:red"><b>Your personalized CUES will appear here once you complete the questionnaire and click "Submit."</b></div>
+<br>
+
+      <p><strong>Table 1. How your CUES compares to individuals in the study. *The CUES reported  in this table have been rounded to the nearest thousand.</strong></p>
 <table border="1" cellspacing="0" cellpadding="0">
     <tr>
       <td width="168"><p align="center">
@@ -472,6 +480,12 @@
       <td width="415" valign="top"><p align="center">Above    median score for those with skin cancer</p></td>
     </tr>
   </table>
+    </div>
+  </div>
+
+ <br><br>
+ 
+  
   <p class="page-header">&nbsp;</p>
 
 
@@ -841,6 +855,20 @@ var locationApp = new LocationAppView;
 // -----------------------------------------------------------------------------------
 
 function updateQuestions() {
+  
+// AZAZAZAZ
+
+  if ($("input[name=age]").val() != '') {
+    $('input[name=skin_type]').removeAttr('disabled');
+  } else {
+    $('input[name=skln_type]').attr('disabled','disabled');
+    $('input[name=skin_type]').prop('checked', false);
+  }
+
+
+
+
+
   if ($("input[name=family_skin_cancer]:checked").val() == 'yes') {
     $('input[name=family_skin_cancer_type]').removeAttr('disabled');
     $('#family_skin_cancer_specific').removeClass('specific-disabled');
@@ -883,7 +911,7 @@ function updateQuestions() {
   }
 }
 
-$('input[name=family_skin_cancer],input[name=skin_cancer]').change(function() {
+$('input[name=family_skin_cancer],input[name=skin_cancer],input[name=age]').change(function() {
   updateQuestions();
 });
 
@@ -1546,6 +1574,7 @@ function calculateCLUE() {
     };
 
     alert('Your CUES is ' + Math.round(totalC/1000)*1000);
+    $('.resultsCUES').html('<b>Your CUES is: '+ Math.round(totalC/1000)*1000 + '.');
 
     /*
     $.ajax({
