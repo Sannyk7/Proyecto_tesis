@@ -153,12 +153,12 @@
   <p class="question">2. How would you rate your skin type - do you burn or tan in the sun?</p>
 
   <div class="radio">
-    <label><input type="radio" name="skin_type" value="1" onclick="initializeTable()" disabled="disabled"/>Type I - Always burns, never tans (pale white skin)</label><br>
-    <label><input type="radio" name="skin_type" value="2" onclick="initializeTable()" disabled="disabled"/>Type II - Burns easily, tans minimally (white skin)</label><br>
-    <label><input type="radio" name="skin_type" value="3" onclick="initializeTable()" disabled="disabled"/>Type III - Burns moderately, tans uniformly (light brown skin)</label><br>
-    <label><input type="radio" name="skin_type" value="4" onclick="initializeTable()" disabled="disabled"/>Type IV - Burns minimally, tans well (moderate brown skin)</label><br>
-    <label><input type="radio" name="skin_type" value="5" onclick="initializeTable()" disabled="disabled"/>Type V - Rarely burns, tans profusely (dark brown skin)</label><br>
-    <label><input type="radio" name="skin_type" value="6" onclick="initializeTable()" disabled="disabled"/>Type VI - Never burns (deeply pigmented dark brown to black skin)</label>
+    <label><input type="radio" name="skin_type" value="1" onclick="initializeTable()" />Type I - Always burns, never tans (pale white skin)</label><br>
+    <label><input type="radio" name="skin_type" value="2" onclick="initializeTable()" />Type II - Burns easily, tans minimally (white skin)</label><br>
+    <label><input type="radio" name="skin_type" value="3" onclick="initializeTable()" />Type III - Burns moderately, tans uniformly (light brown skin)</label><br>
+    <label><input type="radio" name="skin_type" value="4" onclick="initializeTable()" />Type IV - Burns minimally, tans well (moderate brown skin)</label><br>
+    <label><input type="radio" name="skin_type" value="5" onclick="initializeTable()" />Type V - Rarely burns, tans profusely (dark brown skin)</label><br>
+    <label><input type="radio" name="skin_type" value="6" onclick="initializeTable()" />Type VI - Never burns (deeply pigmented dark brown to black skin)</label>
   </div>
 
 
@@ -562,7 +562,7 @@ function initializeTable(){
   if (disableAgeSectionFlag == 0){
       $(".d_work").prop('disabled', false);
       $(".e_work").prop('disabled', false);
-
+      $("#age").prop('disabled', true);
   disableAgeSectionFlag = 1;
 
   }
@@ -856,18 +856,6 @@ var locationApp = new LocationAppView;
 
 function updateQuestions() {
   
-// AZAZAZAZ
-
-  if ($("input[name=age]").val() != '') {
-    $('input[name=skin_type]').removeAttr('disabled');
-  } else {
-    $('input[name=skln_type]').attr('disabled','disabled');
-    $('input[name=skin_type]').prop('checked', false);
-  }
-
-
-
-
 
   if ($("input[name=family_skin_cancer]:checked").val() == 'yes') {
     $('input[name=family_skin_cancer_type]').removeAttr('disabled');
@@ -911,7 +899,7 @@ function updateQuestions() {
   }
 }
 
-$('input[name=family_skin_cancer],input[name=skin_cancer],input[name=age]').change(function() {
+$('input[name=family_skin_cancer],input[name=skin_cancer]').change(function() {
   updateQuestions();
 });
 
